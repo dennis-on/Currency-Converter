@@ -10,42 +10,31 @@ let localIndexStorage
 let countriesWithCurrencies = [];
 let fromCountryInput,
     fromAmountInput,
-    fromCurrencySymbol,
     toCountryInput,
     toAmountInput,
-    toCurrencySymbol,
-    resetButton,
     message,
     errorMessage,
-    successMessage,
-    alert,
-    refreshButton,
-    dismissButton;
+    successMessage;
 
 
 window.onload = () => {
   fromCountryInput = document.getElementById('inputFromCountry');
   fromAmountInput = document.getElementById('inputFromAmount');
-  fromCurrencySymbol = document.getElementById('fromCurrencySymbol');
+  
 
   toCountryInput = document.getElementById('inputToCountry');
   toAmountInput = document.getElementById('inputToAmount');
-  toCurrencySymbol = document.getElementById('toCurrencySymbol');
 
-  resetButton = document.getElementById('reset');
   message = document.getElementById('message');
   errorMessage = document.getElementById('error-message');
   successMessage = document.getElementById('success-message');
-  alert = document.getElementById('alert');
-  alert.style.display = 'none';
+
 
   fromCountryInput.addEventListener('change', handleChange);
   fromAmountInput.addEventListener('input', handleChange);
 
   toCountryInput.addEventListener('change', handleChange);
   toAmountInput.addEventListener('input', handleChange);
-
-  resetButton.addEventListener('click', handleChange);
   
   MainController.registerServiceWorker();
   openDatabase();
@@ -70,10 +59,8 @@ const restoreLastSession = () => {
 
       fromCountryInput.value = fromCountry;
       fromAmountInput.value = fromAmount;
-      fromCurrencySymbol.innerText = fromSymbol;
       toCountryInput.value = toCountry;
       toAmountInput.value = toAmount;
-      toCurrencySymbol.innerText = toSymbol;
     }).catch(error => console.log(error));
 }
 
@@ -91,12 +78,10 @@ const handleChange = (event) => {
   switch (name) {
     case 'inputFromCountry':
       target = countriesWithCurrencies.find(item => item.currencyId === value);
-      fromCurrencySymbol.innerText = target.symbol || '#';
       convert();
       break;
     case 'inputToCountry':
       target = countriesWithCurrencies.find(item => item.currencyId === value);
-      toCurrencySymbol.innerText = target.symbol || '#';
       convert();
       break;
     case 'inputToAmount':
@@ -109,10 +94,8 @@ const handleChange = (event) => {
       inputFromAmount.value = validValue;
       convertSrcToDest();
       break;
-    case 'reset':
-      resetSession();
-      return;
   }
+  logSuccess('');
   saveSession();
 }
 
@@ -132,25 +115,12 @@ const convertDestToSrc = () => {
   convertCurrency(amount, from, to, callback);
 }
 
-const resetSession = () => {
-  fromCountryInput.value = defaultCountry;
-  fromAmountInput.value =  defaultAmount;
-  fromCurrencySymbol.innerText = '#';
-  toCountryInput.value = defaultCountry;
-  toAmountInput.value =  defaultAmount;
-  toCurrencySymbol.innerText = '#';
-  logSuccess('');
-  logInfo('Select countries');
-  saveSession();
-}
 
 const saveSession = () => {
   const fromCountry = fromCountryInput.value;
   const fromAmount = fromAmountInput.value;
-  const fromSymbol = fromCurrencySymbol.innerText;
   const toCountry = toCountryInput.value;
   const toAmount = toAmountInput.value
-  const toSymbol = toCurrencySymbol.innerText;
 
   const lastSession = {
     fromCountry,
@@ -168,7 +138,6 @@ const saveSession = () => {
 }
 
 const fetchCountries = () => {
-  logInfo('Fetching data...');
   const url = `${BASE_URL}${LIST_OF_COUNTRIES}`;
   
   localIndexStorage.open().then(idb => localIndexStorage.getItem(url, idb))
@@ -188,7 +157,7 @@ const fetchCountriesFromNetwork = (url) => {
   .then((json) => {
     if (json) {
       const { results } = json;
-      // save result to idb
+      
       localIndexStorage.open()
         .then(idb => localIndexStorage.setItem(url, results, idb))
         .catch(error => console.log('Database error', error.message));
@@ -196,7 +165,7 @@ const fetchCountriesFromNetwork = (url) => {
     }
     logError('Got empty response');
   })
-  .catch(() => logError('Requires internet connection'));
+  .catch(() => logError(''));
 }
 
 const parseResponse = (results) => {
@@ -204,7 +173,7 @@ const parseResponse = (results) => {
     .then(countries => populateData(countries));
 }
 
-// Retrieve useful information from response data and convert to an array
+
 const getCountries = (results) => {
   return new Promise((resolve) => {
     const values = Object.values(results);
@@ -213,14 +182,13 @@ const getCountries = (results) => {
       countryName: value.name,
       symbol: value.currencySymbol,
     }));
-    // make countries avalable to view handlers
-    countriesWithCurrencies = countries.sort((a, b) => a.countryName.localeCompare(b.countryName));  
-    logInfo('Select countries');
+    
+    countriesWithCurrencies = countries.sort((a, b) => a.countryName.localeCompare(b.countryName));
     return resolve(countries);
   });
 }
 
-// populate the view with retrieved data
+
 function populateData(data) {
   for (let index in data) {
     const { countryName, currencyId } = data[index];
@@ -239,7 +207,6 @@ function createOption(key, value) {
 
 function convertCurrency(amount, from, to, cb) {
   if (!from || !to || !amount) return;
-  logInfo('Converting...');
   from = encodeURIComponent(from);
   to = encodeURIComponent(to);
   const query = `${from}_${to}`;
@@ -262,11 +229,10 @@ const convertCurrencyWithNetwork = (url, query, reciprocal, amount, cb) => {
   .then(response => response.json())
   .then(json => {
     if (json) {
-      const reciprocalValue = json[reciprocal]; // retrieve the reciprocal of the query
+      const reciprocalValue = json[reciprocal];
       const value = json[query];
 
-      calculate(value, amount, query, cb); // calculate the original query
-      // save both original and reciprocal query response
+      calculate(value, amount, query, cb); 
       return localIndexStorage.open()
           .then(idb => localIndexStorage.setItem(query, value, idb))
           .then(() => localIndexStorage.open())
@@ -280,7 +246,7 @@ const convertCurrencyWithNetwork = (url, query, reciprocal, amount, cb) => {
     }
   })
   .catch(error => {
-    logError('Requires internet connection');
+    logError('');
     console.error("Got an error: ", error);
   })
 }
@@ -290,7 +256,7 @@ const calculate = (val, amount, query, cb) => {
   if (val) {
     const total = val * amount;
     cb(Math.round(total * 100) / 100);
-    const message = `At ${val} ${to} per ${from}`;
+    const message = `${amount} ${from} is ${Math.round(val*amount)} ${to}`
     logSuccess(message);
   }
 }
@@ -314,7 +280,6 @@ const logInfo = (text) => {
 }
 
 function openDatabase() {
-  // Check for service worker and IndexedDB
   if (!navigator.serviceWorker || !window.LocalIndexedStorage) return Promise.resolve();
   localIndexStorage = window.LocalIndexedStorage;
 }
@@ -362,14 +327,9 @@ class MainController {
   static updateReady(worker) {
     MainController.showAlert('New version available');
     
-    refreshButton = document.getElementById('refresh');
-    dismissButton = document.getElementById('dismiss');
 
-    refreshButton.addEventListener('click', () => worker.postMessage({ action: 'skipWaiting' }));
-    dismissButton.addEventListener('click', () => alert.style.display = 'none');
   }
 
-  // update-only notification alert
   static showAlert(message) {
     alert.style.display = 'flex';
     const alertMessage = document.getElementById('alert-message');
