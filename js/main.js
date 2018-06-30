@@ -20,7 +20,6 @@ let fromCountryInput,
 window.onload = () => {
   fromCountryInput = document.getElementById('inputFromCountry');
   fromAmountInput = document.getElementById('inputFromAmount');
-  
 
   toCountryInput = document.getElementById('inputToCountry');
   toAmountInput = document.getElementById('inputToAmount');
@@ -29,18 +28,21 @@ window.onload = () => {
   errorMessage = document.getElementById('error-message');
   successMessage = document.getElementById('success-message');
 
-
+alert = document.getElementById('alert');
+  alert.style.display = 'none';
   fromCountryInput.addEventListener('change', handleChange);
   fromAmountInput.addEventListener('input', handleChange);
 
   toCountryInput.addEventListener('change', handleChange);
   toAmountInput.addEventListener('input', handleChange);
+
   
   MainController.registerServiceWorker();
   openDatabase();
   fetchCountries();
   restoreLastSession();
 };
+
 
 const restoreLastSession = () => {
   localIndexStorage.open()
@@ -303,6 +305,7 @@ class MainController {
         return;
       }
 
+
       registration.addEventListener('updatefound', () => {
         MainController.trackInstalling(registration.installing);
       });
@@ -327,7 +330,6 @@ class MainController {
   static updateReady(worker) {
     MainController.showAlert('New version available');
     
-
   }
 
   static showAlert(message) {
