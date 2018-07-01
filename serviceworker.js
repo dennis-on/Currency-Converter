@@ -3,7 +3,7 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/css/main.css',
-  './js/index.js',
+  '/js/index.js',
   '/js/db.js',
   'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js',
 ]
