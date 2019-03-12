@@ -1,10 +1,10 @@
 const BASE_URL = 'https://free.currencyconverterapi.com';
 const LIST_OF_COUNTRIES = '/api/v6/countries';
-const CONVERT = `/api/v6/convert?q=USD_PHP&compact=ultra&apiKey=c10bfc5f1dff25e600ae`;
+const CONVERT = `/api/v6/convert?q=USD_NGN&compact=ultra&apiKey=c10bfc5f1dff25e600ae`;
 
 const defaultCountry = '';
 const defaultCurrency = '';
-const defaultAmount = 10;
+const defaultAmount = 0;
 
 let localIndexStorage
 let countriesWithCurrencies = [];
