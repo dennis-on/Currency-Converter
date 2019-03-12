@@ -4,7 +4,7 @@ const CONVERT = `/api/v6/convert?q=USD_PHP&compact=ultra&apiKey=c10bfc5f1dff25e6
 
 const defaultCountry = '';
 const defaultCurrency = '';
-const defaultAmount = 0;
+const defaultAmount = 10;
 
 let localIndexStorage
 let countriesWithCurrencies = [];
